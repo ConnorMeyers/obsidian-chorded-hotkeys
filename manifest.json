@@ -3,7 +3,7 @@
     "name": "Chorded Hotkeys",
     "version": "1.0.0",
     "minAppVersion": "0.15.0",
-    "description": "Type multiple letters at the same time to trigger text replacement, template insertion, or command execution.",
+    "description": "Type multiple letters at the same time to trigger text insertion, template insertion, or command execution.",
     "author": "Trey Connor Meyers",
     "authorUrl": "https://www.linkedin.com/in/tconnormeyers/",
     "isDesktopOnly": true
