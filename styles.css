@@ -1,8 +1,17 @@
-/*
+.chords-search,
+.chords-text-area {
+    width: calc(100%);
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.chords-key {
+    width: 15%;
+}
 
-If your plugin does not need CSS, delete this file.
+.chords-text-area {
+    height: 30px;
+    resize: vertical;
+}
 
-*/
+.chords-error {
+    border-color: red !important;
+}
