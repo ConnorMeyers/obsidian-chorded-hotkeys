@@ -31,6 +31,7 @@ A tag is a special element added to a chord to augment it's effect.
 Currently there is only one tag, the cursor tag. Adding '{c}' in the value field of a text chord will move the cursor to that position upon activation.
 
 ## Demo
+https://user-images.githubusercontent.com/14039575/199102931-e87a107d-202f-42e9-8247-10f9b4d6f397.mp4
 
 ## Roadmap 
 - [ ] Improve duplicate key presentation in settings.
