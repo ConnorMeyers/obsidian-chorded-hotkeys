@@ -143,7 +143,11 @@ export default class ChordsSettingTab extends PluginSettingTab {
     private addChordsSettings(): void {
         new Setting(this.containerEl)
             .setDesc(createFragment((descEl) => {
-                descEl.appendText("Text chords are used to insert text (similar to text expander)");
+                descEl.appendText("For each chord, the first field is the set of keys used to trigger the chord");
+                descEl.createEl("br");
+                descEl.appendText("The second field is the value for the chord");
+                descEl.createEl("br");
+                descEl.appendText("The third field is the type of chord");
             }))
             .setClass("chords-pre-editor-text");
 
