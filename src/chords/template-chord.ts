@@ -1,21 +1,21 @@
-import { Editor, Notice } from "obsidian";
+import { Editor, Notice, TFile } from "obsidian";
 import { replaceKeyInput } from "./chord-utils";
 
 /**
  * Removes user input and pastes the content of a template file
  * @param editor editor for active file
  * @param key user input to trigger the chord
- * @param value template file path
+ * @param path template file path
  */
-export default async function execute(editor: Editor, key: string, value: string): Promise<void> {
+export default async function execute(editor: Editor, key: string, path: string): Promise<void> {
     replaceKeyInput(editor, key);
 
     //@ts-ignore
     const templaterPlugin = app.plugins.plugins["templater-obsidian"];
 
     if (templaterPlugin) {
-        const file = app.vault.getMarkdownFiles().find(f => f.path == value);
-        if (file) {
+        const file = app.vault.getAbstractFileByPath(path);
+        if (file instanceof TFile) {
             var content = await app.vault.read(file);
             const activeFile = app.workspace.getActiveFile();
 
@@ -31,7 +31,7 @@ export default async function execute(editor: Editor, key: string, value: string
             });
         }
         else {
-            new Notice(`File not found for chord: ${value}`);
+            new Notice(`File not found for chord: ${path}`);
         }
     }
     else {
