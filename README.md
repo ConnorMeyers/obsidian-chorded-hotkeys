@@ -34,5 +34,9 @@ Currently there is only one tag, the cursor tag. Adding '{c}' in the value field
 https://user-images.githubusercontent.com/14039575/199102931-e87a107d-202f-42e9-8247-10f9b4d6f397.mp4
 
 ## Roadmap 
+- [ ] Change chord input to work like setting a hotkey instead of typing it out. 
 - [ ] Improve duplicate key presentation in settings.
 - [ ] Add error presentation in settings for invalid chord value (*e.g.* file that doesn't exist).
+- [ ] Support for event keys (ctrl, shift, alt, etc.)
+- [ ] Support for using command templates outside of a markdown editor.
+- [ ] Support for vim mode.
