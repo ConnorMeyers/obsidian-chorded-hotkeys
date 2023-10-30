@@ -1,4 +1,4 @@
-import { Editor, Notice } from "obsidian";
+import { Editor, Notice, TFile } from "obsidian";
 import "../utils/string.extensions";
 import TextChord from "./text-chord";
 import CommandChord from "./command-chord";
@@ -154,6 +154,21 @@ export default class ChordManager {
         return this._plugin.Settings.chords.findIndex((c, i) => c.key.sort() == key && i != index) >= 0;
     }
 
+    public hasValidValue(index: number): boolean {
+        var chord = this._plugin.Settings.chords[index];
+        switch (chord.chordType) {
+            case ChordType.Command:
+                return app.commands.listCommands().find(c => c.name == chord.value);;
+            case ChordType.File:
+            case ChordType.Template:
+                return app.vault.getAbstractFileByPath(chord.value) instanceof TFile;
+            case ChordType.Text:
+                return true;
+        }
+
+        throw new Error("Unhandled chord type");
+    }
+
     /**
      * Enables a chord so it can be used
      * Required to set up hashing for keys to chords
@@ -178,6 +193,7 @@ export default class ChordManager {
         if (this._chordDict[key as keyof ChordDictionary] == index) {
             delete this._chordDict[key as keyof ChordDictionary];
 
+            // If the chord being disabled had any duplicates, enable one of them since the slot is now available
             const duplicateKey = this._plugin.Settings.chords.findIndex((c, i) => c.key.sort() == key && i != index);
             if (duplicateKey >= 0) {
                 this.enableChord(duplicateKey);

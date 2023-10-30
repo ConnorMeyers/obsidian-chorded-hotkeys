@@ -22,12 +22,18 @@ export default async function execute(editor: Editor, key: string, path: string)
             //@ts-ignore
             content = await templaterPlugin.templater.parse_template({ target_file: activeFile, run_mode: 4 }, content);
 
-            replaceKeyInput(editor, "", content);
+            if (templaterPlugin.settings.auto_jump_to_cursor) {
+                var { new_content, positions } = templaterPlugin.editor_handler.cursor_jumper.replace_and_get_cursor_positions(content);
+            }
+
+            new_content = new_content ?? content;
+
+            replaceKeyInput(editor, "", new_content);
 
             const cursor = editor.getCursor();
             editor.setCursor({
-                line: cursor.line,
-                ch: cursor.ch + content.length,
+                line: cursor.line + (positions ? positions[0].line : 0),
+                ch: (positions ? positions[0].ch : cursor.ch + new_content.length),
             });
         }
         else {

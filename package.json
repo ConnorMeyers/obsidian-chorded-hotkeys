@@ -1,6 +1,6 @@
 {
     "name": "obsidian-chorded-hotkeys",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Type multiple letters at the same time to trigger text insertion, template insertion, or command execution.",
     "main": "main.js",
     "scripts": {

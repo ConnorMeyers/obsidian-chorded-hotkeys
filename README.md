@@ -34,9 +34,22 @@ Currently there is only one tag, the cursor tag. Adding '{c}' in the value field
 https://user-images.githubusercontent.com/14039575/199102931-e87a107d-202f-42e9-8247-10f9b4d6f397.mp4
 
 ## Roadmap 
-- [ ] Change chord input to work like setting a hotkey instead of typing it out. 
-- [ ] Improve duplicate key presentation in settings.
-- [ ] Add error presentation in settings for invalid chord value (*e.g.* file that doesn't exist).
-- [ ] Support for event keys (ctrl, shift, alt, etc.)
-- [ ] Support for using command templates outside of a markdown editor.
-- [ ] Support for vim mode.
+- Add the ability to have multiple chord dictionaries and switch between them.
+- Trigger chords from any context, not just editor.
+
+# Compare with similar plugins
+
+**Chorded hotkeys**
+
+- Use chords for text insertion, template insertion, or command execution.
+- Any set of keys can be used as a trigger, the triggering method is to press all the keys at once (like you're playing a musical chord).
+
+**Key sequence shortcut**
+
+- Limited to commands.
+- Type Ctrl-M to open a menu, then input your character sequence to trigger.
+
+**Sequence hotkeys**, **Hotkeys chords**
+
+- Limited to commands.
+- Sequence of hotkeys (event keys required) to trigger commands.

@@ -1,5 +1,5 @@
 import ChordsPlugin from "../main";
-import { App, Notice, PluginSettingTab, Setting } from "obsidian";
+import { App, Notice, PluginSettingTab, SearchComponent, Setting, TextComponent } from "obsidian";
 import { delayToWpm, wpmToDelay } from "./settings";
 import { ChordType } from "src/chords/chord-manager";
 import { CommandSuggster } from "src/suggesters/command-suggester";
@@ -15,6 +15,8 @@ export default class ChordsSettingTab extends PluginSettingTab {
         [ChordType.File]: this.addFileChordSettings,
     }
 
+    private _chordTriggers: TextComponent[] = [];
+
     public constructor(app: App, plugin: ChordsPlugin) {
         super(app, plugin);
         this._plugin = plugin;
@@ -28,9 +30,11 @@ export default class ChordsSettingTab extends PluginSettingTab {
 
         this.containerEl.createEl('h2', { text: `${this._plugin.AppName} - ${this._plugin.AppVersion}` });
 
+        this.containerEl.createEl('h3', { text: "Notices" });
         this.addNoticeToggle();
 
         this.containerEl.createEl('h3', { text: "Delay" });
+        this.addDelayDesc();
         this.addDelayWPMToggle();
         if (this._plugin.Settings.setDelayManually) {
             this.addDelaySettings();
@@ -49,7 +53,7 @@ export default class ChordsSettingTab extends PluginSettingTab {
      */
     private addNoticeToggle(): void {
         new Setting(this.containerEl.createDiv())
-            .setName("Text Chord Notice")
+            .setName("Text")
             .setDesc("Show a notice when a text chord is executed")
             .addToggle(t => t.setValue(this._plugin.Settings.showTextChordExecuted).onChange(async v => {
                 this._plugin.Settings.showTextChordExecuted = v;
@@ -57,7 +61,7 @@ export default class ChordsSettingTab extends PluginSettingTab {
             }));
 
         new Setting(this.containerEl.createDiv())
-            .setName("Command Template Notice")
+            .setName("Template")
             .setDesc("Show a notice when a template chord is executed")
             .addToggle(t => t.setValue(this._plugin.Settings.showTemplateChordExecuted).onChange(async v => {
                 this._plugin.Settings.showTemplateChordExecuted = v;
@@ -65,7 +69,7 @@ export default class ChordsSettingTab extends PluginSettingTab {
             }));
 
         new Setting(this.containerEl.createDiv())
-            .setName("Command File Notice")
+            .setName("File")
             .setDesc("Show a notice when a file chord is executed")
             .addToggle(t => t.setValue(this._plugin.Settings.showFileChordExecuted).onChange(async v => {
                 this._plugin.Settings.showFileChordExecuted = v;
@@ -73,7 +77,7 @@ export default class ChordsSettingTab extends PluginSettingTab {
             }));
 
         new Setting(this.containerEl.createDiv())
-            .setName("Command Chord Notice")
+            .setName("Command")
             .setDesc("Show a notice when a command chord is executed")
             .addToggle(t => t.setValue(this._plugin.Settings.showCommandChordExecuted).onChange(async v => {
                 this._plugin.Settings.showCommandChordExecuted = v;
@@ -87,7 +91,7 @@ export default class ChordsSettingTab extends PluginSettingTab {
     private addDelayWPMToggle(): void {
         new Setting(this.containerEl)
             .setName("Set Delay Manually")
-            .setDesc("Delay is the maximum duration between key presses in a chord, toggle this to set it yourself")
+            .setDesc("Toggle this to set the delay yourself")
             .addToggle(t => t.setValue(this._plugin.Settings.setDelayManually).onChange(async v => {
                 this._plugin.Settings.setDelayManually = v;
                 await this._plugin.saveSettings();
@@ -138,6 +142,35 @@ export default class ChordsSettingTab extends PluginSettingTab {
     }
 
     /**
+     * Adds description explaining what delay is
+     */
+    private addDelayDesc(): void {
+        new Setting(this.containerEl)
+            .setDesc(createFragment((descEl) => {
+                descEl.appendText("For each chord, the first field is the set of keys used to trigger the chord");
+                descEl.createEl("br");
+                descEl.appendText("The second field is the value for the chord");
+                descEl.createEl("br");
+                descEl.appendText("The third field is the type of chord");
+            }))
+            .setClass("delay-pre-settings-text");
+    }
+
+    /**
+     * Highlights duplicate triggers in red
+     */
+    private displayDuplicates(): void {
+        for (var i = 0; i < this._plugin.Settings.chords.length; i++) {
+            if (this._plugin.ChordManager.isDuplicateKey(i)) {
+                this._chordTriggers[i].inputEl.addClass("chords-error");
+            }
+            else {
+                this._chordTriggers[i].inputEl.removeClass("chords-error");
+            }
+        }
+    }
+
+    /**
      * Adds chord input settings
      */
     private addChordsSettings(): void {
@@ -151,20 +184,17 @@ export default class ChordsSettingTab extends PluginSettingTab {
             }))
             .setClass("chords-pre-editor-text");
 
+        this._chordTriggers = [];
+
         this._plugin.Settings.chords.forEach(({ key, value, chordType }, index) => {
-            var chordSetting = new Setting(this.containerEl.createDiv())
+            var chordSetting = new Setting(this.containerEl)
                 .addText(text => {
+                    this._chordTriggers.push(text);
                     text.setPlaceholder("sav")
                         .setValue(key)
                         .onChange(async newKey => {
                             await this._plugin.ChordManager.updateChordKey(index, newKey);
-
-                            if (this._plugin.ChordManager.isDuplicateKey(index)) {
-                                text.inputEl.addClass("chords-error");
-                            }
-                            else {
-                                text.inputEl.removeClass("chords-error");
-                            }
+                            this.displayDuplicates();
                         });
 
                     text.inputEl.addClass("chords-key");
@@ -208,6 +238,8 @@ export default class ChordsSettingTab extends PluginSettingTab {
             chordSetting.infoEl.remove();
         });
 
+        this.displayDuplicates();
+
         new Setting(this.containerEl.createDiv())
             .addButton(cb => {
                 cb.setButtonText("Add new chord")
@@ -217,6 +249,15 @@ export default class ChordsSettingTab extends PluginSettingTab {
                         this.display();
                     });
             });
+    }
+
+    private validateChordValue(element: HTMLElement, chordIndex: number) {
+        if (this._plugin.ChordManager.hasValidValue(chordIndex)) {
+            element.removeClass("chords-error");
+        }
+        else {
+            element.addClass("chords-error");
+        }
     }
 
     /**
@@ -233,7 +274,10 @@ export default class ChordsSettingTab extends PluginSettingTab {
                 .setValue(value)
                 .onChange(async (newValue) => {
                     await this._plugin.ChordManager.updateChordValue(index, newValue);
+                    this.validateChordValue(cb.inputEl, index);
                 });
+
+            this.validateChordValue(cb.inputEl, index);
 
             // @ts-ignore
             cb.containerEl.addClass("chords-search");
@@ -255,7 +299,10 @@ export default class ChordsSettingTab extends PluginSettingTab {
                 .setValue(value)
                 .onChange(async (newValue) => {
                     await this._plugin.ChordManager.updateChordValue(index, newValue);
+                    this.validateChordValue(cb.inputEl, index);
                 });
+
+            this.validateChordValue(cb.inputEl, index);
 
             // @ts-ignore
             cb.containerEl.addClass("chords-search");
@@ -276,7 +323,10 @@ export default class ChordsSettingTab extends PluginSettingTab {
                 .setValue(value)
                 .onChange(async (newValue) => {
                     await this._plugin.ChordManager.updateChordValue(index, newValue);
+                    this.validateChordValue(cb.inputEl, index);
                 });
+
+            this.validateChordValue(cb.inputEl, index);
 
             // @ts-ignore
             cb.inputEl.addClass("chords-text-area");
